@@ -1,5 +1,6 @@
 package com.example.simplenotes.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,10 +30,9 @@ import com.example.simplenotes.viewmodel.NoteViewModel
 fun MainScreen(viewModel: NoteViewModel = viewModel()) {
     val notes by viewModel.notes
     var showDialog by remember { mutableStateOf(false) }
+    var selectedDescription by remember { mutableStateOf<String?>(null) }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Spacer(modifier = Modifier.padding(top = 40.dp))
         Text(
             text = "Simple Notes App",
@@ -47,13 +49,16 @@ fun MainScreen(viewModel: NoteViewModel = viewModel()) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(8.dp)
+                        .clickable {
+                            selectedDescription = note.description
+                        },
                     elevation = CardDefaults.cardElevation(8.dp),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(text = note.title, fontWeight = FontWeight.Bold)
-                        Text(text = note.description, color = Color.Gray)
+                        Text(text = note.description, color = Color.Gray, maxLines = 1)
                     }
                 }
             }
@@ -66,5 +71,17 @@ fun MainScreen(viewModel: NoteViewModel = viewModel()) {
             showDialog = false
         }
     }
-}
 
+    if (selectedDescription != null) {
+        AlertDialog(
+            onDismissRequest = { selectedDescription = null },
+            title = { Text(text = "Note Details") },
+            text = { Text(text = selectedDescription!!) },
+            confirmButton = {
+                Button(onClick = { selectedDescription = null }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+}
